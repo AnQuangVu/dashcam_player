@@ -36,4 +36,9 @@ class MethodChannelDashcamPlayer extends DashcamPlayerPlatform {
   Future<void> replayVideo() async {
     await methodChannel.invokeMethod<void>('replay');
   }
+
+  @override
+  Future<void> stopVideo() async {
+    await methodChannel.invokeMethod<void>('stopVideo');
+  }
 }

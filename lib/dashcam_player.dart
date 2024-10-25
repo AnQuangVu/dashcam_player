@@ -20,4 +20,8 @@ class DashcamPlayer {
   Future<void> replayVideo() {
     return DashcamPlayerPlatform.instance.replayVideo();
   }
+
+  Future<void> stopVideo() {
+    return DashcamPlayerPlatform.instance.stopVideo();
+  }
 }

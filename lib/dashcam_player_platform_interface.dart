@@ -37,10 +37,14 @@ abstract class DashcamPlayerPlatform extends PlatformInterface {
   }
 
   Future<void> seekTo(double position) {
-    throw UnimplementedError('stopVideo() has not been implemented.');
+    throw UnimplementedError('seekTo() has not been implemented.');
   }
 
   Future<void> replayVideo() {
+    throw UnimplementedError('replayVideo() has not been implemented.');
+  }
+
+  Future<void> stopVideo() {
     throw UnimplementedError('stopVideo() has not been implemented.');
   }
 }

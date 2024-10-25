@@ -1,4 +1,6 @@
 #import "DashcamPlayerPlugin.h"
+#import "MobileVLCKit/MobileVLCKit.h"
+#import "PlayerFactory.h"
 
 @implementation DashcamPlayerPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -6,12 +8,34 @@
       methodChannelWithName:@"dashcam_player"
             binaryMessenger:[registrar messenger]];
   DashcamPlayerPlugin* instance = [[DashcamPlayerPlugin alloc] init];
+  instance.mediaPlayer = [[VLCMediaPlayer alloc] init];
+    PlayerFactory *factory = [[PlayerFactory alloc] initWithMessenger:registrar.messenger withMediaPlayer:instance.mediaPlayer];
+  [registrar registerViewFactory:factory withId:@"player"];
   [registrar addMethodCallDelegate:instance channel:channel];
 }
+
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([@"getPlatformVersion" isEqualToString:call.method]) {
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
+  } else if ([@"seekTo" isEqual:call.method]) {
+      double position = [call.arguments[@"position" ] doubleValue];
+      [self.mediaPlayer setPosition:position];
+      result(nil);
+  } else if([@"pauseVideo" isEqual:call.method]) {
+      [self.mediaPlayer pause];
+      result(nil);
+  } else if([@"playVideo" isEqual:call.method]) {
+      [self.mediaPlayer play];
+      result(nil);
+  } else if ([@"stopVideo" isEqual:call.method]) {
+      [self.mediaPlayer stop];
+      result(nil);
+  } else if ([@"replay" isEqual:call.method]) {
+      [self.mediaPlayer stop];
+      [self.mediaPlayer setPosition:0.0];
+      [self.mediaPlayer play];
+      result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
