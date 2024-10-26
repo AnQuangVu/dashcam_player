@@ -60,9 +60,12 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
         } else {
             result.success(null) // duration không xác định
         }
-    }else
-    {
-      result.notImplemented()
+    } else if(call.method == "stopVideo") {
+        val exoPlayer = getExoPlayer()
+        exoPlayer?.stop()
+        result.success(null)
+    } else {
+        result.notImplemented()
     }
   }
 
