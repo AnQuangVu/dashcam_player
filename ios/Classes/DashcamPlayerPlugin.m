@@ -26,7 +26,11 @@
       [self.mediaPlayer pause];
       result(nil);
   } else if([@"playVideo" isEqual:call.method]) {
-      [self.mediaPlayer play];
+      int retry = 3;
+      if (![self.mediaPlayer isPlaying] && retry > 0) {
+          [self.mediaPlayer play];
+          retry--;
+      }
       result(nil);
   } else if ([@"stopVideo" isEqual:call.method]) {
       [self.mediaPlayer stop];
@@ -36,6 +40,14 @@
       [self.mediaPlayer setPosition:0.0];
       [self.mediaPlayer play];
       result(nil);
+  } else if([@"getDuration" isEqual:call.method]) {
+      VLCTime *time = self.mediaPlayer.media.length;
+      if (time) {
+          int duration = time.intValue / 1000; // Chuyển đổi thành giây
+          result(@(duration));
+      } else {
+          result(@0); // Trả về 0 nếu không có thời lượng
+      }
   } else {
     result(FlutterMethodNotImplemented);
   }
