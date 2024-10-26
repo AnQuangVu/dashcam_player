@@ -47,4 +47,8 @@ abstract class DashcamPlayerPlatform extends PlatformInterface {
   Future<void> stopVideo() {
     throw UnimplementedError('stopVideo() has not been implemented.');
   }
+
+  Future<int?> duration() {
+    throw UnimplementedError('duration() has not been implemented.');
+  }
 }
