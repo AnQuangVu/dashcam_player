@@ -1,6 +1,7 @@
 package com.example.dashcam_player
 
 import androidx.annotation.NonNull
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -50,7 +51,17 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
         exoPlayer?.seekTo(0)
         exoPlayer?.play()
         result.success(null)
-    } else {
+    } else if(call.method == "getDuration") {
+        val exoPlayer = getExoPlayer()
+        val duration = exoPlayer?.duration
+        if (duration != C.TIME_UNSET) { // kiểm tra nếu duration hợp lệ
+            val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
+            result.success(res)
+        } else {
+            result.success(null) // duration không xác định
+        }
+    }else
+    {
       result.notImplemented()
     }
   }
