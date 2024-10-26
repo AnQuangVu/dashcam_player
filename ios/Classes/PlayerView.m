@@ -14,7 +14,14 @@
         _view.backgroundColor = [UIColor blackColor];
         mediaPlayer.drawable = _view;
         NSString *videoURL = args[@"videoURL"];
-        VLCMedia *media = [VLCMedia mediaWithURL:[NSURL URLWithString: videoURL]];
+        NSNumber *isLocalFile = args[@"isLocalFile"];
+        BOOL isLocal = [isLocalFile boolValue];
+        VLCMedia *media;
+        if (isLocal) {
+            media = [VLCMedia mediaWithPath:videoURL];
+        } else {
+            media = [VLCMedia mediaWithURL:[NSURL URLWithString: videoURL]];
+        }
         //[media setLength:[VLCTime timeWithNumber:@(60 * 1000)]];
         mediaPlayer.media = media;
         [mediaPlayer play];
