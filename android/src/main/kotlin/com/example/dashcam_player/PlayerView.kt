@@ -37,6 +37,90 @@ class PlayerView(
         exoPlayer?.setMediaItem(MediaItem.fromUri(urlVideo))
         exoPlayer?.prepare()
         exoPlayer?.play()
+
+        startProgressUpdater()
+        imgPlay.setOnClickListener {
+            togglePlayPause()
+        }
+        viewOnTouchListener?.setOnClickListener {
+            if (viewProgressBar?.visibility == View.VISIBLE) {
+                viewProgressBar?.visibility = View.GONE
+                handlerHide.removeCallbacksAndMessages(null)
+            } else {
+                viewProgressBar?.visibility = View.VISIBLE
+                handlerHide.removeCallbacksAndMessages(null)
+                handlerHide.postDelayed({
+                    viewProgressBar?.visibility = View.GONE // Ẩn view sau 3 giây
+                }, 3000)
+            }
+        }
+
+        progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    // Khi người dùng kéo seekbar, thực hiện seekTo() đến vị trí tương ứng
+                    val newPosition = (progress * exoPlayer?.duration!! / 100)
+                    exoPlayer?.seekTo(newPosition)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+//                // Tùy chọn: có thể dừng video khi người dùng bắt đầu kéo seekbar
+//                exoPlayer?.pause()
+            }
+
+            //
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+//                // Tùy chọn: tiếp tục phát video sau khi người dùng đã kéo seekbar
+//                exoPlayer?.play()
+            }
+        })
+    }
+
+    private fun startProgressUpdater() {
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                exoPlayer?.let {
+                    // Update current time
+                    val currentPosition = it.currentPosition
+                    val duration = it.duration
+                    val currentTimeString = formatTime(currentPosition)
+                    val totalTimeString = formatTime(duration)
+
+                    txtTimePlay.text = currentTimeString
+                    txtTimeVideo.text = totalTimeString
+                    progressBar.progress = (currentPosition * 100 / duration).toInt()
+                }
+                handler.postDelayed(this, 500) // Update every second
+            }
+        }
+        handler.post(runnable)
+    }
+
+    // Helper function to format time in HH:mm:ss
+    private fun formatTime(timeInMillis: Long): String {
+        val seconds = (timeInMillis / 1000).toInt()
+        val minutes = seconds / 60
+        return String.format("%02d:%02d", minutes % 60, seconds % 60)
+    }
+
+    // Play/pause toggle
+    fun togglePlayPause() {
+        exoPlayer?.let {
+            if (it.isPlaying) {
+                it.pause()
+                imgPlay.setImageResource(R.drawable.pause) // Change to play icon
+            } else {
+                if (it.currentPosition == it.duration) {
+                    it.seekTo(0)
+                    txtTimePlay.text = formatTime(0) // Đặt thời gian hiện tại về 0
+                    progressBar.progress = 0
+                }
+                it.play()
+                imgPlay.setImageResource(R.drawable.play) // Change to pause icon
+            }
+        }
     }
 
     override fun getView(): View {
