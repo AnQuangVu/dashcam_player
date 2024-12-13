@@ -25,7 +25,6 @@ class PlayerView(
         // Inflate the layout and initialize the GLSurfaceView
         view = LayoutInflater.from(context).inflate(R.layout.player_view, null)
         val urlVideo = creationParams["urlVideo"] as String
-        Log.d("PlayerView", "urlVideo: $urlVideo")
         playerView = view.findViewById<PlayerView>(R.id.playerView)
         playerView?.useController = false
         exoPlayer = ExoPlayer.Builder(context).build()
