@@ -1,15 +1,19 @@
 package com.example.dashcam_player
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.TextureView
 import android.view.View
+import android.widget.TextView
 import io.flutter.plugin.platform.PlatformView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,14 +34,18 @@ class G3StreamView(
     private var textureView: TextureView? = null
     private var webSocketClient: WebSocketClient? = null
     private var queueFrame: Queue<ByteArray> = LinkedList<ByteArray>()
+    private var queueMetadata: Queue<String> = LinkedList<String>()
     private var startStream: Boolean = false
     private var frameCount = 0
     private var view: View
     private val paint = Paint()
     val frameExecutor = Executors.newSingleThreadExecutor()
+    private var currentMessage: String? = ""
+    private var metadataView: TextView? = null
     init {
         view = LayoutInflater.from(context).inflate(R.layout.g3_stream_view, null)
         textureView = view.findViewById(R.id.textureView)
+        metadataView = view.findViewById(R.id.meta_data)
         initWebSocket()
         showView()
     }
@@ -57,19 +65,21 @@ class G3StreamView(
         CoroutineScope(Dispatchers.IO).launch {
             webSocketClient = object : WebSocketClient(uri) {
                 override fun onOpen(handshakedata: ServerHandshake?) {
-                    startStream = true
+
                 }
 
                 override fun onMessage(message: String?) {
+                    if(message != currentMessage) {
+                        currentMessage = message
+                    }
                 }
 
                 override fun onMessage(bytes: ByteBuffer?) {
-                    // Chuyển đổi byte array thành bitmap và hiển thị
                     if (bytes != null) {
+                        startStream = true
                         val nv21 = bytes.array()
                         queueFrame.add(nv21)
                         frameExecutor.execute {
-                            // Thay vì tạo Thread mới mỗi lần, xử lý bằng Executor
                             webSocketClient?.send("Next frame please")
                         }
                     }
@@ -99,12 +109,17 @@ class G3StreamView(
                 if (queueFrame.isNotEmpty()) {
                     val nv21 = queueFrame.poll()
                     if (nv21 != null) {
-                        displayFrame(decompressData(nv21))
-                        Thread.sleep(25)
-                        frameCount++
-                        if (frameCount % 2 == 0 && queueFrame.size > 30) {
-                            queueFrame.poll()
+                        CoroutineScope(Dispatchers.Main).launch {
+                            displayFrame(decompressData(nv21))
+                            metadataView?.text = currentMessage
                         }
+                        frameExecutor.execute {
+                            if(webSocketClient?.isOpen == true) {
+                                webSocketClient?.send("Next frame please")
+                            }
+                        }
+                        Thread.sleep(25)
+
                     }
 
                 }
@@ -115,7 +130,7 @@ class G3StreamView(
 
     fun displayFrame(nv21: ByteArray) {
         try {
-            val bitmap = BitmapFactory.decodeByteArray(nv21, 0, nv21.size)
+            var bitmap = BitmapFactory.decodeByteArray(nv21, 0, nv21.size)
             textureView?.lockCanvas()?.let { canvas ->
                 canvas.drawBitmap(bitmap, 0f, 0f, null)
                 textureView?.unlockCanvasAndPost(canvas)
