@@ -23,6 +23,7 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "dashcam_player")
     channel.setMethodCallHandler(this)
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("player", PlayerFactory(this))
+    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("g3_stream", G3StreamFactory())
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
