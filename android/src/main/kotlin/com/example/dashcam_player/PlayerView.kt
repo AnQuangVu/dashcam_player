@@ -18,6 +18,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 
 class PlayerView(
     context: Context, id: Int, creationParams: Map<String, Any>
@@ -42,6 +43,7 @@ class PlayerView(
         val urlVideo = creationParams["urlVideo"] as String
         Log.d("PlayerView", "urlVideo: $urlVideo")
         playerView = view.findViewById<PlayerView>(R.id.playerView)
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
         imgPlay = view.findViewById(R.id.img_play)
         txtTimePlay = view.findViewById(R.id.txt_time_play)
