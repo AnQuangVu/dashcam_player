@@ -19,6 +19,8 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import com.google.android.exoplayer2.PlaybackException
+
 
 class PlayerView(
     context: Context, id: Int, creationParams: Map<String, Any>
@@ -83,6 +85,10 @@ class PlayerView(
                     viewProgressBar?.visibility = View.VISIBLE
                 }
             }
+
+            override fun onPlayerError(error: PlaybackException) {
+                Log.e("ExoPlayer", "Playback error: ${error.message}")
+            }
         })
 
         exoPlayer?.play()
@@ -139,7 +145,11 @@ class PlayerView(
 
                     txtTimePlay.text = currentTimeString
                     txtTimeVideo.text = totalTimeString
-                    progressBar.progress = (currentPosition * 100 / duration).toInt()
+                    if (duration != 0L) {
+                        progressBar.progress = (currentPosition * 100 / duration).toInt()
+                    } else {
+                        progressBar.progress = 0;
+                    }
                 }
                 handler.postDelayed(this, 500) // Update every second
             }
