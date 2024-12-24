@@ -109,8 +109,8 @@ class G3StreamView(
                 if (queueFrame.isNotEmpty()) {
                     val nv21 = queueFrame.poll()
                     if (nv21 != null) {
+                        displayFrame(decompressData(nv21))
                         CoroutineScope(Dispatchers.Main).launch {
-                            displayFrame(decompressData(nv21))
                             metadataView?.text = currentMessage
                         }
                         frameExecutor.execute {
