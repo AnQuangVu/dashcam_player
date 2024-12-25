@@ -29,6 +29,8 @@ import java.util.concurrent.Executors
 import java.util.zip.Inflater
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import android.widget.FrameLayout
+import android.graphics.Rect
 
 
 class G3StreamView(
@@ -48,6 +50,12 @@ class G3StreamView(
     init {
         view = LayoutInflater.from(context).inflate(R.layout.g3_stream_view, null)
         textureView = view.findViewById(R.id.textureView)
+        textureView?.let { textureView ->
+            textureView.layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
         metadataView = view.findViewById(R.id.meta_data)
         initWebSocket()
         showView()
@@ -57,19 +65,15 @@ class G3StreamView(
         // URI của WebSocket server (thay <server-ip> và <port> bằng địa chỉ IP và cổng của server)
         val uri: URI
         try {
-            uri =
-                URI("ws://192.168.43.1:9090") // Thay <server-ip> bằng địa chỉ IP của thiết bị server
+            uri = URI("ws://192.168.43.1:9090") // Thay <server-ip> bằng địa chỉ IP của thiết bị server
         } catch (e: Exception) {
             Log.d("WebSocket", "Error: ${e.message}")
-
             return
         }
 
         CoroutineScope(Dispatchers.IO).launch {
             webSocketClient = object : WebSocketClient(uri) {
-                override fun onOpen(handshakedata: ServerHandshake?) {
-
-                }
+                override fun onOpen(handshakedata: ServerHandshake?) {}
 
                 override fun onMessage(message: String?) {
                     if(message != currentMessage) {
@@ -78,7 +82,7 @@ class G3StreamView(
                 }
 
                 override fun onMessage(bytes: ByteBuffer?) {
-                    if (bytes != null) {
+                    if (bytes != null && bytes.hasRemaining()) {
                         startStream = true
                         val nv21 = bytes.array()
                         queueFrame.add(nv21)
@@ -139,7 +143,8 @@ class G3StreamView(
             val bitmap = BitmapFactory.decodeByteArray(nv21, 0, nv21.size)
             val canvas = textureView?.lockCanvas()
             if (canvas != null) {
-                canvas.drawBitmap(bitmap, 0f, 0f, null)
+                val destRect = Rect(0, 0, canvas.width, canvas.height) // Full màn hình
+                canvas.drawBitmap(bitmap, null, destRect, null)
                 textureView?.unlockCanvasAndPost(canvas)
             }
         } catch (e: Exception) {
