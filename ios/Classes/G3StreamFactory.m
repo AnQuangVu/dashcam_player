@@ -5,9 +5,10 @@
 }
 
 - (instancetype)initWithMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
-                                  {
+                   metaDaInStream: (SharedMetaData* _Nonnull)metaDataInStream {
   self = [super init];
   if (self) {
+      _metaDataInStream = metaDataInStream;
     _messenger = messenger;
       _views = [NSMutableDictionary dictionary];
   }
@@ -20,7 +21,8 @@
   G3StreamView *view = [[G3StreamView alloc] initWithFrame:frame
                               viewIdentifier:viewId
                                    arguments:args
-                             binaryMessenger:_messenger];
+                                           binaryMessenger:_messenger
+                                            metaDaInStream:_metaDataInStream];
     self.views[@(viewId)] = view;
     return view;
 }

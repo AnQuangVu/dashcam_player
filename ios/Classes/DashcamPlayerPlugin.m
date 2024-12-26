@@ -2,8 +2,10 @@
 #import "MobileVLCKit/MobileVLCKit.h"
 #import "PlayerFactory.h"
 #import "G3StreamFactory.h"
+#import "G3StreamView.h"
 
 @implementation DashcamPlayerPlugin
+SharedMetaData* metaDataInStream;
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"dashcam_player"
@@ -11,7 +13,8 @@
   DashcamPlayerPlugin* instance = [[DashcamPlayerPlugin alloc] init];
   instance.mediaPlayer = [[VLCMediaPlayer alloc] init];
   PlayerFactory *factory = [[PlayerFactory alloc] initWithMessenger:registrar.messenger withMediaPlayer:instance.mediaPlayer];
-  G3StreamFactory *g3Factory = [[G3StreamFactory alloc] initWithMessenger:registrar.messenger];
+    metaDataInStream = [[SharedMetaData alloc] init];
+    G3StreamFactory *g3Factory = [[G3StreamFactory alloc] initWithMessenger:registrar.messenger metaDaInStream:metaDataInStream];
   [registrar registerViewFactory:g3Factory withId:@"g3_stream"];
   [registrar registerViewFactory:factory withId:@"player"];
   [registrar addMethodCallDelegate:instance channel:channel];
@@ -51,6 +54,9 @@
       } else {
           result(@0); // Trả về 0 nếu không có thời lượng
       }
+  } else if([@"getMetadataInStream" isEqual:call.method]) {
+      NSLog(@"nnnnnnnnnnn: @", [metaDataInStream getMetaData]);
+      result([metaDataInStream getMetaData]);
   } else {
     result(FlutterMethodNotImplemented);
   }

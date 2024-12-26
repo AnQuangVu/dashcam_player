@@ -6,11 +6,13 @@
 - (instancetype _Nullable )initWithFrame:(CGRect)frame
                viewIdentifier:(int64_t)viewId
                     arguments:(id _Nullable)args
-                         binaryMessenger:(NSObject<FlutterBinaryMessenger>*_Nonnull)messenger {
+                         binaryMessenger:(NSObject<FlutterBinaryMessenger>*_Nonnull)messenger
+                          metaDaInStream:(SharedMetaData * _Nonnull)metaDataInStream {
     if (self) {
         self.imageView = [[UIImageView alloc] initWithFrame:frame];
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         _view = self.imageView;
+        self.metaDataInStream = metaDataInStream;
         [self initView];
         self.processingQueue = dispatch_queue_create("frameProcessingQueue",  DISPATCH_QUEUE_SERIAL);
         self.frameQueue = [NSMutableArray array];
@@ -43,22 +45,23 @@
 
     // Add layout constraints for logoImageView
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
-    [NSLayoutConstraint activateConstraints:@[
-        [logoImageView.trailingAnchor constraintEqualToAnchor:linearLayout.trailingAnchor constant:-screenWidth*0.37],
-        [logoImageView.bottomAnchor constraintEqualToAnchor:linearLayout.bottomAnchor constant:-3]
-    ]];
 
     // Add TextView (meta_data equivalent)
     self.metaDataLabel = [[UILabel alloc] init];
     self.metaDataLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.metaDataLabel.font = [UIFont systemFontOfSize:8];
     self.metaDataLabel.textColor = [UIColor whiteColor];
+    self.metaDataLabel.numberOfLines = 0;
     [linearLayout addSubview:self.metaDataLabel];
-
-    // Add layout constraints for metaDataLabel
+    
     [NSLayoutConstraint activateConstraints:@[
-        [self.metaDataLabel.trailingAnchor constraintEqualToAnchor:linearLayout.trailingAnchor constant:-20],
-        [self.metaDataLabel.bottomAnchor constraintEqualToAnchor:linearLayout.bottomAnchor constant:-3]
+        // Ràng buộc metaDataLabel
+        [self.metaDataLabel.trailingAnchor constraintEqualToAnchor:linearLayout.trailingAnchor constant:-16],
+        [self.metaDataLabel.bottomAnchor constraintEqualToAnchor:linearLayout.bottomAnchor constant:-3],
+        
+        // Ràng buộc logoImageView
+        [logoImageView.trailingAnchor constraintEqualToAnchor:self.metaDataLabel.leadingAnchor constant:-8],
+        [logoImageView.bottomAnchor constraintEqualToAnchor:self.metaDataLabel.bottomAnchor],
     ]];
 }
 
@@ -122,7 +125,14 @@
     UIImage *image = [UIImage imageWithData:[self decompressData:data]];
     if(image) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.metaDataLabel.text = self.metaData;
+            NSArray<NSString *> *datas = [self.metaData componentsSeparatedByString:@": "];
+            NSLog(@"nnnnnn: %@ - %@", datas[0], self.metaData);
+            self.metaDataLabel.text = datas[0];
+            if (datas.count > 1) {
+                [
+                    self.metaDataInStream setMetaData:datas[1]
+                ];
+            }
             self.imageView.image = image;
         });
     }
