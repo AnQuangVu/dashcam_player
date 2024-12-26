@@ -175,7 +175,6 @@ class G3StreamView(
     override fun dispose() {
         webSocketClient?.close()
         queueFrame.clear()
-        queueMetadata.clear()
     }
 
 }
