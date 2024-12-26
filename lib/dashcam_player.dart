@@ -24,8 +24,12 @@ class DashcamPlayer {
   Future<void> stopVideo() {
     return DashcamPlayerPlatform.instance.stopVideo();
   }
-  
+
   Future<int?> duration() {
     return DashcamPlayerPlatform.instance.duration();
+  }
+
+  Future<String?> getMetadataInStream() {
+    return DashcamPlayerPlatform.instance.getMetadataInStream();
   }
 }
