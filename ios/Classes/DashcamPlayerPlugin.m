@@ -1,6 +1,7 @@
 #import "DashcamPlayerPlugin.h"
 #import "MobileVLCKit/MobileVLCKit.h"
 #import "PlayerFactory.h"
+#import "G3StreamFactory.h"
 
 @implementation DashcamPlayerPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -9,7 +10,9 @@
             binaryMessenger:[registrar messenger]];
   DashcamPlayerPlugin* instance = [[DashcamPlayerPlugin alloc] init];
   instance.mediaPlayer = [[VLCMediaPlayer alloc] init];
-    PlayerFactory *factory = [[PlayerFactory alloc] initWithMessenger:registrar.messenger withMediaPlayer:instance.mediaPlayer];
+  PlayerFactory *factory = [[PlayerFactory alloc] initWithMessenger:registrar.messenger withMediaPlayer:instance.mediaPlayer];
+  G3StreamFactory *g3Factory = [[G3StreamFactory alloc] initWithMessenger:registrar.messenger];
+  [registrar registerViewFactory:g3Factory withId:@"g3_stream"];
   [registrar registerViewFactory:factory withId:@"player"];
   [registrar addMethodCallDelegate:instance channel:channel];
 }

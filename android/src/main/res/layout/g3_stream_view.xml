@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
         <TextureView
             android:id="@+id/textureView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="end"
-            >
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_gravity="bottom|end"
-                android:src="@drawable/logo_white"/>
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/logo_white" />
+
             <TextView
+                android:id="@+id/meta_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:textSize="8sp"
-                android:textColor="#FFFFFF"
                 android:layout_gravity="bottom|end"
-                android:id="@+id/meta_data"
+                android:layout_marginEnd="20dp"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
                 tools:ignore="SmallSp" />
         </LinearLayout>
 </FrameLayout>

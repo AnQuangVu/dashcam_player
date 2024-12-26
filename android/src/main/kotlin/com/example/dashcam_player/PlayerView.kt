@@ -18,6 +18,9 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import com.google.android.exoplayer2.PlaybackException
+
 
 class PlayerView(
     context: Context, id: Int, creationParams: Map<String, Any>
@@ -42,6 +45,7 @@ class PlayerView(
         val urlVideo = creationParams["urlVideo"] as String
         Log.d("PlayerView", "urlVideo: $urlVideo")
         playerView = view.findViewById<PlayerView>(R.id.playerView)
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
         imgPlay = view.findViewById(R.id.img_play)
         txtTimePlay = view.findViewById(R.id.txt_time_play)
@@ -80,6 +84,10 @@ class PlayerView(
                     imgPlay.setImageResource(R.drawable.pause) // Reset to play icon when video ends
                     viewProgressBar?.visibility = View.VISIBLE
                 }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                Log.e("ExoPlayer", "Playback error: ${error.message}")
             }
         })
 
@@ -137,7 +145,11 @@ class PlayerView(
 
                     txtTimePlay.text = currentTimeString
                     txtTimeVideo.text = totalTimeString
-                    progressBar.progress = (currentPosition * 100 / duration).toInt()
+                    if (duration != 0L) {
+                        progressBar.progress = (currentPosition * 100 / duration).toInt()
+                    } else {
+                        progressBar.progress = 0;
+                    }
                 }
                 handler.postDelayed(this, 500) // Update every second
             }
@@ -159,10 +171,10 @@ class PlayerView(
                 it.pause()
                 imgPlay.setImageResource(R.drawable.pause) // Change to play icon
             } else {
-                if (it.currentPosition == it.duration) {
+                if (it.currentPosition >= it.duration) {
                     it.seekTo(0)
-                    txtTimePlay.text = formatTime(0) // Đặt thời gian hiện tại về 0
                     progressBar.progress = 0
+                    txtTimePlay.text = formatTime(0) // Đặt thời gian hiện tại về 0
                 }
                 it.play()
                 imgPlay.setImageResource(R.drawable.play) // Change to pause icon
