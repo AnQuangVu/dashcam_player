@@ -18,12 +18,13 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private var dashcamView: PlayerView? = null
+  private var metaDataInStream: SharedMetaData = SharedMetaData(null)
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "dashcam_player")
     channel.setMethodCallHandler(this)
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("player", PlayerFactory(this))
-    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("g3_stream", G3StreamFactory())
+    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("g3_stream", G3StreamFactory(metaDataInStream))
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -61,8 +62,9 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
         } else {
             result.success(null) // duration không xác định
         }
-    }else
-    {
+    } else if (call.method == "getMetadataInStream") {
+        result.success(metaDataInStream.getGPSData())
+    } else {
       result.notImplemented()
     }
   }

@@ -29,14 +29,12 @@ import java.util.concurrent.Executors
 import java.util.zip.Inflater
 
 class G3StreamView(
-    context: Context, id: Int, creationParams: Map<String, Any>
+    context: Context, id: Int, creationParams: Map<String, Any>, val metaDataInStream: SharedMetaData?,
 ) : PlatformView  {
     private var textureView: TextureView? = null
     private var webSocketClient: WebSocketClient? = null
     private var queueFrame: Queue<ByteArray> = LinkedList<ByteArray>()
-    private var queueMetadata: Queue<String> = LinkedList<String>()
     private var startStream: Boolean = false
-    private var frameCount = 0
     private var view: View
     private val paint = Paint()
     val frameExecutor = Executors.newSingleThreadExecutor()
@@ -71,6 +69,7 @@ class G3StreamView(
                 override fun onMessage(message: String?) {
                     if(message != currentMessage) {
                         currentMessage = message
+                        metaDataInStream?.metaData = message
                     }
                 }
 
@@ -109,9 +108,9 @@ class G3StreamView(
                 if (queueFrame.isNotEmpty()) {
                     val nv21 = queueFrame.poll()
                     if (nv21 != null) {
+                        displayFrame(decompressData(nv21))
                         CoroutineScope(Dispatchers.Main).launch {
-                            displayFrame(decompressData(nv21))
-                            metadataView?.text = currentMessage
+                            metadataView?.text = currentMessage?.split(":")?.first()
                         }
                         frameExecutor.execute {
                             if(webSocketClient?.isOpen == true) {
