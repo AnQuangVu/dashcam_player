@@ -34,33 +34,59 @@
 }
 
 - (void)setupControls {
-    CGFloat buttonSize = 50.0;
-    CGFloat padding = 10.0;
+    CGFloat buttonSize = 30.0;
+    CGFloat padding = 4.0;
 
     // Play/Pause button
-    self.playPauseButton = [[UIButton alloc] initWithFrame:CGRectMake(padding, self.view.frame.size.height - buttonSize - padding, buttonSize, buttonSize)];
+    self.playPauseButton = [UIButton new];
+    [self.playPauseButton setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.playPauseButton setImage:[UIImage systemImageNamed:@"play.fill"] forState:UIControlStateNormal];
     [self.playPauseButton addTarget:self action:@selector(togglePlayPause) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.playPauseButton];
 
     // Progress slider
-    self.progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(padding * 2 + buttonSize, self.view.frame.size.height - buttonSize, self.view.frame.size.width - buttonSize - padding * 3, 20)];
+    self.progressSlider = [UISlider new];
+    [self.progressSlider setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.progressSlider addTarget:self action:@selector(progressSliderChanged:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:self.progressSlider];
 
     // Current time label
-    self.currentTimeLabel = [[UILabel alloc] initWithFrame:CGRectMake(padding, self.view.frame.size.height - buttonSize - 20, 60, 20)];
+    self.currentTimeLabel = [UILabel new];
+    [self.currentTimeLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     self.currentTimeLabel.textColor = [UIColor whiteColor];
     self.currentTimeLabel.font = [UIFont systemFontOfSize:12];
     self.currentTimeLabel.text = @"00:00";
     [self.view addSubview:self.currentTimeLabel];
 
     // Duration label
-    self.durationLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width - 60 - padding, self.view.frame.size.height - buttonSize - 20, 60, 20)];
+    self.durationLabel = [UILabel new];
+    [self.durationLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     self.durationLabel.textColor = [UIColor whiteColor];
     self.durationLabel.font = [UIFont systemFontOfSize:12];
     self.durationLabel.text = @"00:00";
     [self.view addSubview:self.durationLabel];
+
+    // Auto Layout constraints
+    [NSLayoutConstraint activateConstraints:@[
+            // Play/Pause button
+            [self.playPauseButton.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:padding],
+            [self.playPauseButton.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-padding],
+            [self.playPauseButton.widthAnchor constraintEqualToConstant:buttonSize],
+            [self.playPauseButton.heightAnchor constraintEqualToConstant:buttonSize],
+
+            // Current time label
+            [self.currentTimeLabel.leadingAnchor constraintEqualToAnchor:self.playPauseButton.trailingAnchor constant:padding],
+            [self.currentTimeLabel.centerYAnchor constraintEqualToAnchor:self.playPauseButton.centerYAnchor],
+
+            // Duration label
+            [self.durationLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-padding],
+            [self.durationLabel.centerYAnchor constraintEqualToAnchor:self.playPauseButton.centerYAnchor],
+
+            // Progress slider
+            [self.progressSlider.leadingAnchor constraintEqualToAnchor:self.currentTimeLabel.trailingAnchor constant:padding],
+            [self.progressSlider.trailingAnchor constraintEqualToAnchor:self.durationLabel.leadingAnchor constant:-padding],
+            [self.progressSlider.centerYAnchor constraintEqualToAnchor:self.playPauseButton.centerYAnchor]
+    ]];
 }
 
 - (void)togglePlayPause {
