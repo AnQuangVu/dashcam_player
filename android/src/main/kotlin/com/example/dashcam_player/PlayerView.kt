@@ -88,6 +88,8 @@ class PlayerView(
 
             override fun onPlayerError(error: PlaybackException) {
                 Log.e("ExoPlayer", "Playback error: ${error.message}")
+                txtTimePlay.text = formatTime(0)
+                txtTimeVideo.text = formatTime(0)
             }
         })
 
