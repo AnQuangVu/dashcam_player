@@ -34,8 +34,11 @@ import android.graphics.Rect
 
 
 class G3StreamView(
-    context: Context, id: Int, creationParams: Map<String, Any>, val metaDataInStream: SharedMetaData?,
-) : PlatformView  {
+    context: Context,
+    id: Int,
+    creationParams: Map<String, Any>,
+    val metaDataInStream: SharedMetaData?,
+) : PlatformView {
     private var textureView: TextureView? = null
     private var webSocketClient: WebSocketClient? = null
     private var queueFrame: Queue<ByteArray> = LinkedList<ByteArray>()
@@ -45,6 +48,7 @@ class G3StreamView(
     val frameExecutor = Executors.newSingleThreadExecutor()
     private var currentMessage: String? = ""
     private var metadataView: TextView? = null
+
     init {
         view = LayoutInflater.from(context).inflate(R.layout.g3_stream_view, null)
         textureView = view.findViewById(R.id.textureView)
@@ -63,7 +67,8 @@ class G3StreamView(
         // URI của WebSocket server (thay <server-ip> và <port> bằng địa chỉ IP và cổng của server)
         val uri: URI
         try {
-            uri = URI("ws://192.168.43.1:9090") // Thay <server-ip> bằng địa chỉ IP của thiết bị server
+            uri =
+                URI("ws://192.168.43.1:9090") // Thay <server-ip> bằng địa chỉ IP của thiết bị server
         } catch (e: Exception) {
             Log.d("WebSocket", "Error: ${e.message}")
             return
@@ -74,7 +79,7 @@ class G3StreamView(
                 override fun onOpen(handshakedata: ServerHandshake?) {}
 
                 override fun onMessage(message: String?) {
-                    if(message != currentMessage) {
+                    if (message != currentMessage) {
                         currentMessage = message
                         metaDataInStream?.metaData = message
                     }
@@ -135,15 +140,16 @@ class G3StreamView(
     }
 
 
-
     fun displayFrame(nv21: ByteArray) {
         try {
             val bitmap = BitmapFactory.decodeByteArray(nv21, 0, nv21.size)
-            val canvas = textureView?.lockCanvas()
-            if (canvas != null) {
-                val destRect = Rect(0, 0, canvas.width, canvas.height) // Full màn hình
-                canvas.drawBitmap(bitmap, null, destRect, null)
-                textureView?.unlockCanvasAndPost(canvas)
+            if (bitmap != null && !bitmap.isRecycled) {
+                val canvas = textureView?.lockCanvas()
+                if (canvas != null) {
+                    val destRect = Rect(0, 0, canvas.width, canvas.height) // Full màn hình
+                    canvas.drawBitmap(bitmap, null, destRect, null)
+                    textureView?.unlockCanvasAndPost(canvas)
+                }
             }
         } catch (e: Exception) {
             Log.d("WebSocket", "Error displaying frame: ${e.message}")
@@ -173,7 +179,6 @@ class G3StreamView(
     }
 
     override fun dispose() {
-        webSocketClient?.close()
         queueFrame.clear()
     }
 
