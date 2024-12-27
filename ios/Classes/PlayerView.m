@@ -14,8 +14,6 @@
         _view.backgroundColor = [UIColor blackColor];
         mediaPlayer.drawable = _view;
 
-        [self setupControls];
-
         NSString *videoURL = args[@"videoURL"];
         NSNumber *isLocalFile = args[@"isLocalFile"];
         BOOL isLocal = [isLocalFile boolValue];
@@ -28,6 +26,7 @@
         //[media setLength:[VLCTime timeWithNumber:@(60 * 1000)]];
         mediaPlayer.media = media;
         [mediaPlayer play];
+        [self setupControls];
         [self startProgressUpdater];
     }
     return self;
