@@ -142,17 +142,24 @@ class G3StreamView(
 
     fun displayFrame(nv21: ByteArray) {
         try {
+            // Decode the byte array to a Bitmap
             val bitmap = BitmapFactory.decodeByteArray(nv21, 0, nv21.size)
             if (bitmap != null && !bitmap.isRecycled) {
+                // Lock the canvas for drawing
                 val canvas = textureView?.lockCanvas()
-                if (canvas != null) {
-                    val destRect = Rect(0, 0, canvas.width, canvas.height) // Full màn hình
-                    canvas.drawBitmap(bitmap, null, destRect, null)
-                    textureView?.unlockCanvasAndPost(canvas)
+                canvas?.let {
+                    // Define the destination rectangle for full-screen rendering
+                    val destRect = Rect(0, 0, it.width, it.height)
+                    // Draw the Bitmap onto the canvas
+                    it.drawBitmap(bitmap, null, destRect, null)
+                    // Post the canvas
+                    textureView?.unlockCanvasAndPost(it)
                 }
+            } else {
+                Log.w("WebSocket", "Bitmap is null or recycled")
             }
         } catch (e: Exception) {
-            Log.d("WebSocket", "Error displaying frame: ${e.message}")
+            Log.e("WebSocket", "Error displaying frame: ${e.message}", e)
         }
     }
 
