@@ -182,7 +182,7 @@
 
 - (void)dispose {
     self.isStreaming = NO;
-    [self.websocketTask cancelWithCloseCode:NSURLSessionWebSocketCloseCodeGoingAway reason:nil];
+    // [self.websocketTask cancelWithCloseCode:NSURLSessionWebSocketCloseCodeGoingAway reason:nil];
 }
 
 - (void)dealloc {
