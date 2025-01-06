@@ -1,13 +1,18 @@
 package com.example.dashcam_player
 
+import android.net.Uri
+import android.util.Log
 import androidx.annotation.NonNull
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import com.google.android.exoplayer2.ExoPlayer as ExoPlayer2
+import com.google.android.exoplayer2.C
+import java.io.File
 import io.flutter.plugin.common.MethodChannel.Result
 
 /** DashcamPlayerPlugin */
@@ -19,12 +24,14 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private var dashcamView: PlayerView? = null
   private var metaDataInStream: SharedMetaData = SharedMetaData(null)
+  private var g3StreamOnlineView: G3StreamOnlineView? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "dashcam_player")
     channel.setMethodCallHandler(this)
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("player", PlayerFactory(this))
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("g3_stream", G3StreamFactory(metaDataInStream))
+    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("g3_stream_online", G3StreamOnlineFactory(this))
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -60,10 +67,24 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
             val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
             result.success(res)
         } else {
-            result.success(null) // duration không xác định
+            result.success(null)// duration không xác định
         }
     } else if (call.method == "getMetadataInStream") {
         result.success(metaDataInStream.getGPSData())
+    } else if (call.method == "playNextFileInStream") {
+        val path: String = call.argument("path")!!
+        val uri = Uri.fromFile(File(path))
+        val mediaItem = MediaItem.fromUri(uri)
+
+        getExoPlayerG3()?.addMediaItem(mediaItem)
+        getExoPlayerG3()?.prepare()
+        getExoPlayerG3()?.play()
+        if (g3StreamOnlineView?.statePlay == Player.STATE_ENDED) {
+            Thread.sleep(500)
+            getExoPlayerG3()?.seekTo(0)
+            g3StreamOnlineView?.statePlay = 2
+        }
+        result.success(null)
     } else {
       result.notImplemented()
     }
@@ -73,6 +94,8 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null)
     dashcamView?.dispose()
     dashcamView = null
+    g3StreamOnlineView?.dispose()
+    g3StreamOnlineView = null
   }
 
 
@@ -82,7 +105,14 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   // Hàm truy cập ExoPlayer
-  fun getExoPlayer(): ExoPlayer? {
+  fun getExoPlayer(): ExoPlayer2? {
     return dashcamView?.exoPlayer
+  }
+  fun setG3StreamOnlineView(view: G3StreamOnlineView) {
+    this.g3StreamOnlineView = view
+  }
+
+  fun getExoPlayerG3(): ExoPlayer? {
+    return g3StreamOnlineView?.exoPlayer
   }
 }

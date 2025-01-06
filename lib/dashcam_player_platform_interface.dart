@@ -55,4 +55,8 @@ abstract class DashcamPlayerPlatform extends PlatformInterface {
   Future<String?> getMetadataInStream() {
     throw UnimplementedError('getMetaData() has not been implemented.');
   }
+
+  Future<void> playNextFileInStream(String path) {
+    throw UnimplementedError('playNextFileInStream() has not been implemented.');
+  }
 }

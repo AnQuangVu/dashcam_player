@@ -52,4 +52,11 @@ class MethodChannelDashcamPlayer extends DashcamPlayerPlatform {
     String? metaData = await methodChannel.invokeMethod<String>('getMetadataInStream');
     return metaData;
   }
+
+  @override
+  Future<void> playNextFileInStream(String path) async {
+    await methodChannel.invokeMethod<void>('playNextFileInStream', {
+      'path': path,
+    });
+  }
 }

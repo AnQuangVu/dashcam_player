@@ -32,4 +32,8 @@ class DashcamPlayer {
   Future<String?> getMetadataInStream() {
     return DashcamPlayerPlatform.instance.getMetadataInStream();
   }
+
+  Future<void> playNextFileInStream(String path) {
+    return DashcamPlayerPlatform.instance.playNextFileInStream(path);
+  }
 }
