@@ -3,6 +3,7 @@
 #import "PlayerFactory.h"
 #import "G3StreamFactory.h"
 #import "G3StreamView.h"
+#import "G3StreamOnlineFactory.h"
 
 @implementation DashcamPlayerPlugin
 SharedMetaData* metaDataInStream;
@@ -12,9 +13,13 @@ SharedMetaData* metaDataInStream;
             binaryMessenger:[registrar messenger]];
   DashcamPlayerPlugin* instance = [[DashcamPlayerPlugin alloc] init];
   instance.mediaPlayer = [[VLCMediaPlayer alloc] init];
+  instance.queuePlayer = [[AVQueuePlayer alloc] init];
+  instance.playerLayer = [AVPlayerLayer playerLayerWithPlayer:instance.queuePlayer];
   PlayerFactory *factory = [[PlayerFactory alloc] initWithMessenger:registrar.messenger withMediaPlayer:instance.mediaPlayer];
-    metaDataInStream = [[SharedMetaData alloc] init];
-    G3StreamFactory *g3Factory = [[G3StreamFactory alloc] initWithMessenger:registrar.messenger metaDaInStream:metaDataInStream];
+  metaDataInStream = [[SharedMetaData alloc] init];
+  G3StreamFactory *g3Factory = [[G3StreamFactory alloc] initWithMessenger:registrar.messenger metaDaInStream:metaDataInStream];
+  G3StreamOnlineFactory *g3StreamOnlineFactory = [[G3StreamOnlineFactory alloc] initWithMessenger:registrar.messenger withQueuePlayer:instance.queuePlayer withPlayerLayer:instance.playerLayer];
+  [registrar registerViewFactory:g3StreamOnlineFactory withId:@"g3_stream_online"];
   [registrar registerViewFactory:g3Factory withId:@"g3_stream"];
   [registrar registerViewFactory:factory withId:@"player"];
   [registrar addMethodCallDelegate:instance channel:channel];
@@ -55,11 +60,28 @@ SharedMetaData* metaDataInStream;
           result(@0); // Trả về 0 nếu không có thời lượng
       }
   } else if([@"getMetadataInStream" isEqual:call.method]) {
-      NSLog(@"nnnnnnnnnnn: @", [metaDataInStream getMetaData]);
       result([metaDataInStream getMetaData]);
+  } else if([@"playNextFileInStream" isEqual:call.method]) {
+      NSString* path = call.arguments[@"path"];
+      NSLog(@"Pathhhhhhhhhhhh%@:", path);
+      [self playSegment:[NSURL fileURLWithPath:path]];
+      result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (void)handleVideoEnd:(NSNotification *)notification {
+    AVPlayerItem *endedItem = notification.object;
+    if (endedItem == self.queuePlayer.currentItem) {
+        [self.queuePlayer pause];
+    }
+}
+
+- (void)playSegment:(NSURL *)fileURL {
+    AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:fileURL];
+    [self.queuePlayer insertItem:playerItem afterItem:nil];
+    [self.queuePlayer play];
 }
 
 @end
