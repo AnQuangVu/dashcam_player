@@ -10,8 +10,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.google.android.exoplayer2.ExoPlayer as ExoPlayer2
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 import java.io.File
 import io.flutter.plugin.common.MethodChannel.Result
 
@@ -105,7 +104,7 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   // Hàm truy cập ExoPlayer
-  fun getExoPlayer(): ExoPlayer2? {
+  fun getExoPlayer(): ExoPlayer? {
     return dashcamView?.exoPlayer
   }
   fun setG3StreamOnlineView(view: G3StreamOnlineView) {

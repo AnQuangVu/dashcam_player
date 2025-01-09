@@ -11,17 +11,19 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
-import com.google.android.exoplayer2.C
+import androidx.annotation.OptIn
 import io.flutter.plugin.platform.PlatformView
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.PlaybackException
 
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 
+@OptIn(UnstableApi::class)
 class PlayerView(
     context: Context, id: Int, creationParams: Map<String, Any>
 ) : PlatformView {
@@ -44,8 +46,7 @@ class PlayerView(
         view = LayoutInflater.from(context).inflate(R.layout.player_view, null)
         val urlVideo = creationParams["urlVideo"] as String
         Log.d("PlayerView", "urlVideo: $urlVideo")
-        playerView = view.findViewById<PlayerView>(R.id.playerView)
-        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        playerView = view.findViewById(R.id.playerView)
 
         imgPlay = view.findViewById(R.id.img_play)
         txtTimePlay = view.findViewById(R.id.txt_time_play)
