@@ -45,6 +45,7 @@ SharedMetaData* metaDataInStream;
       result(nil);
   } else if ([@"stopVideo" isEqual:call.method]) {
       [self.mediaPlayer stop];
+      self.mediaPlayer.drawable = nil;
       result(nil);
   } else if ([@"replay" isEqual:call.method]) {
       [self.mediaPlayer stop];
