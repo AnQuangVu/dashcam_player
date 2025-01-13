@@ -53,18 +53,12 @@ SharedMetaData* metaDataInStream;
       [self.mediaPlayer play];
       result(nil);
   } else if([@"getDuration" isEqual:call.method]) {
-      VLCTime *time = self.mediaPlayer.media.length;
-      if (time) {
-          int duration = time.intValue / 1000; // Chuyển đổi thành giây
-          result(@(duration));
-      } else {
-          result(@0); // Trả về 0 nếu không có thời lượng
-      }
+      NSString *path = call.arguments[@"path"]; // Lấy đường dẫn dạng NSString
+      result(@([self getDuration:path]));
   } else if([@"getMetadataInStream" isEqual:call.method]) {
       result([metaDataInStream getMetaData]);
   } else if([@"playNextFileInStream" isEqual:call.method]) {
       NSString* path = call.arguments[@"path"];
-      NSLog(@"Pathhhhhhhhhhhh%@:", path);
       [self playSegment:[NSURL fileURLWithPath:path]];
       result(nil);
   } else {
@@ -85,4 +79,12 @@ SharedMetaData* metaDataInStream;
     [self.queuePlayer play];
 }
 
+- (NSInteger)getDuration:(NSString *)path {
+    NSURL *url = [NSURL fileURLWithPath:path]; // Chuyển từ NSString sang NSURL
+    AVAsset *asset = [AVAsset assetWithURL:url];
+    CMTime duration = asset.duration;
+    Float64 seconds = CMTimeGetSeconds(duration);
+    NSInteger durationInSeconds = (NSInteger)seconds; // Chuyển đổi từ Float64 sang NSInteger
+    return durationInSeconds; // Trả về số nguyên
+}
 @end

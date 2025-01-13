@@ -42,8 +42,11 @@ class MethodChannelDashcamPlayer extends DashcamPlayerPlatform {
     await methodChannel.invokeMethod<void>('stopVideo');
   }
 
-  Future<int?> duration() async {
-    int? duration = await methodChannel.invokeMethod<int>('getDuration');
+  @override
+  Future<int?> getDuration(String path) async {
+    int? duration = await methodChannel.invokeMethod<int>('getDuration', {
+      'path': path,
+    });
     return duration;
   }
 
