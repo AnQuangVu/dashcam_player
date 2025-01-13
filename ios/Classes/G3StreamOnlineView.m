@@ -23,4 +23,8 @@
 - (UIView *)view {
     return _view;
 }
+
+-(void) dealloc {
+    [self.queuePlayer pause];
+}
 @end
