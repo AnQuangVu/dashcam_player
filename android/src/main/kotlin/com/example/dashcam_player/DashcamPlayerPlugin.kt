@@ -68,34 +68,14 @@ class DashcamPlayerPlugin : FlutterPlugin, MethodCallHandler {
         } else if (call.method == "getDuration") {
             val path: String = call.argument("path")!!
             if (path.startsWith("http")) {
-//                val exoPlayer = getExoPlayer()
-//                val duration = exoPlayer?.duration
-//                if (duration != C.TIME_UNSET) { // kiểm tra nếu duration hợp lệ
-//                    val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
-//                    result.success(res)
-//                } else {
-//                    result.success(null)// duration không xác định
-//                }
-
                 val exoPlayer = getExoPlayer()
-                val mediaItem = MediaItem.fromUri(path)
-                exoPlayer?.setMediaItem(mediaItem)
-                exoPlayer?.prepare()
-
-                exoPlayer?.addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY) {  // Chỉ lấy duration khi ExoPlayer đã sẵn sàng
-                            val duration = exoPlayer.duration
-                            if (duration != C.TIME_UNSET) {
-                                val res = (duration / 1000).toInt() // Chuyển đổi sang giây
-                                result.success(res)
-                            } else {
-                                result.success(null) // Duration chưa xác định
-                            }
-                        }
-                    }
-                })
-
+                val duration = exoPlayer?.duration
+                if (duration != C.TIME_UNSET) { // kiểm tra nếu duration hợp lệ
+                    val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
+                    result.success(res)
+                } else {
+                    result.success(null)// duration không xác định
+                }
             } else {
                 val retriever = MediaMetadataRetriever()
                 try {
