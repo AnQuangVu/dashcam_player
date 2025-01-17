@@ -15,6 +15,7 @@ import java.io.File
 import io.flutter.plugin.common.MethodChannel.Result
 import android.media.MediaMetadataRetriever
 
+
 /** DashcamPlayerPlugin */
 class DashcamPlayerPlugin : FlutterPlugin, MethodCallHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -66,17 +67,48 @@ class DashcamPlayerPlugin : FlutterPlugin, MethodCallHandler {
             result.success(null)
         } else if (call.method == "getDuration") {
             val path: String = call.argument("path")!!
-            val retriever = MediaMetadataRetriever()
-            try {
-                retriever.setDataSource(path) // Đặt nguồn video
-                val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                val duration = durationStr?.toLongOrNull() ?: 0L // Nếu không có giá trị thì gán 0
-                result.success((duration / 1000).toInt()) // Trả về thời gian tính bằng giây
-            } catch (e: Exception) {
-                e.printStackTrace()
-                result.success(0) // Trả về 0 nếu có lỗi
-            } finally {
-                retriever.release() // Giải phóng tài nguyên
+            if (path.startsWith("http")) {
+//                val exoPlayer = getExoPlayer()
+//                val duration = exoPlayer?.duration
+//                if (duration != C.TIME_UNSET) { // kiểm tra nếu duration hợp lệ
+//                    val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
+//                    result.success(res)
+//                } else {
+//                    result.success(null)// duration không xác định
+//                }
+
+                val exoPlayer = getExoPlayer()
+                val mediaItem = MediaItem.fromUri(path)
+                exoPlayer?.setMediaItem(mediaItem)
+                exoPlayer?.prepare()
+
+                exoPlayer?.addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_READY) {  // Chỉ lấy duration khi ExoPlayer đã sẵn sàng
+                            val duration = exoPlayer.duration
+                            if (duration != C.TIME_UNSET) {
+                                val res = (duration / 1000).toInt() // Chuyển đổi sang giây
+                                result.success(res)
+                            } else {
+                                result.success(null) // Duration chưa xác định
+                            }
+                        }
+                    }
+                })
+
+            } else {
+                val retriever = MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(path) // Đặt nguồn video
+                    val durationStr =
+                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    val duration =
+                        durationStr?.toLongOrNull() ?: 0L // Nếu không có giá trị thì gán 0
+                    result.success((duration / 1000).toInt()) // Trả về thời gian tính bằng giây
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    result.success(0) // Trả về 0 nếu có lỗi
+                }
             }
         } else if (call.method == "getMetadataInStream") {
             result.success(metaDataInStream.getGPSData())
