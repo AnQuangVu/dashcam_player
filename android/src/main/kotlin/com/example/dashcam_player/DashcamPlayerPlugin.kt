@@ -68,27 +68,9 @@ class DashcamPlayerPlugin : FlutterPlugin, MethodCallHandler {
         } else if (call.method == "getDuration") {
             val path: String = call.argument("path")!!
             if (path.startsWith("http")) {
-                val exoPlayer = getExoPlayer()
-                val duration = exoPlayer?.duration
-                if (duration != C.TIME_UNSET) { // kiểm tra nếu duration hợp lệ
-                    val res = (duration?.div(1000))?.toInt() // chuyển đổi sang giây
-                    result.success(res)
-                } else {
-                    result.success(null)// duration không xác định
-                }
+                result.success(getDurationNetwork(path))
             } else {
-                val retriever = MediaMetadataRetriever()
-                try {
-                    retriever.setDataSource(path) // Đặt nguồn video
-                    val durationStr =
-                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                    val duration =
-                        durationStr?.toLongOrNull() ?: 0L // Nếu không có giá trị thì gán 0
-                    result.success((duration / 1000).toInt()) // Trả về thời gian tính bằng giây
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    result.success(0) // Trả về 0 nếu có lỗi
-                }
+                result.success(getDurationLocalFile(path))
             }
         } else if (call.method == "getMetadataInStream") {
             result.success(metaDataInStream.getGPSData())
@@ -136,5 +118,32 @@ class DashcamPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
     fun getExoPlayerG3(): ExoPlayer? {
         return g3StreamOnlineView?.exoPlayer
+    }
+
+    fun getDurationLocalFile(path: String): Int {
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(path) // Đặt nguồn video
+            val durationStr =
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            val duration =
+                durationStr?.toLongOrNull() ?: 0L // Nếu không có giá trị thì gán 0
+            return (duration / 1000).toInt() // Trả về thời gian tính bằng giây
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return 0 // Trả về 0 nếu có lỗi
+        }
+        return 0
+    }
+
+    fun getDurationNetwork(path: String): Int {
+        val exoPlayer = getExoPlayer()
+        val duration = exoPlayer?.duration ?: C.TIME_UNSET // Đảm bảo không null
+
+        return if (duration != C.TIME_UNSET) {
+            (duration / 1000).toInt() // Chuyển đổi sang giây
+        } else {
+            0
+        }
     }
 }
