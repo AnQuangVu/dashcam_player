@@ -80,7 +80,7 @@ class DashcamPlayerPlugin: FlutterPlugin, MethodCallHandler {
         getExoPlayerG3()?.play()
         if (g3StreamOnlineView?.statePlay == Player.STATE_ENDED) {
             Thread.sleep(500)
-            getExoPlayerG3()?.seekTo(0)
+            getExoPlayerG3()?.seekTo(2000)
             g3StreamOnlineView?.statePlay = 2
         }
         result.success(null)

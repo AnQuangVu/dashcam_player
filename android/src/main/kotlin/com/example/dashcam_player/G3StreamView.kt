@@ -48,6 +48,7 @@ class G3StreamView(
     val frameExecutor = Executors.newSingleThreadExecutor()
     private var currentMessage: String? = ""
     private var metadataView: TextView? = null
+    private var isRunning = false
 
     init {
         view = LayoutInflater.from(context).inflate(R.layout.g3_stream_view, null)
@@ -59,6 +60,7 @@ class G3StreamView(
             )
         }
         metadataView = view.findViewById(R.id.meta_data)
+        isRunning = true
         initWebSocket()
         showView()
     }
@@ -119,7 +121,7 @@ class G3StreamView(
                 if (startStream) break
                 delay(2000)
             }
-            while (true) {
+            while (isRunning) {
                 if (queueFrame.isNotEmpty()) {
                     val nv21 = queueFrame.poll()
                     if (nv21 != null) {
@@ -150,9 +152,10 @@ class G3StreamView(
                 canvas?.let {
                     // Define the destination rectangle for full-screen rendering
                     val destRect = Rect(0, 0, it.width, it.height)
-                    // Draw the Bitmap onto the canvas
                     it.drawBitmap(bitmap, null, destRect, null)
-                    // Post the canvas
+                    if (!isRunning) {
+                        return
+                    }
                     textureView?.unlockCanvasAndPost(it)
                 }
             } else {
@@ -186,6 +189,7 @@ class G3StreamView(
     }
 
     override fun dispose() {
+        isRunning = false
         queueFrame.clear()
     }
 
