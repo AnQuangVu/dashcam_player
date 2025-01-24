@@ -157,6 +157,7 @@ class G3StreamView(
                         return
                     }
                     textureView?.unlockCanvasAndPost(it)
+                    bitmap.recycle()
                 }
             } else {
                 Log.w("WebSocket", "Bitmap is null or recycled")
