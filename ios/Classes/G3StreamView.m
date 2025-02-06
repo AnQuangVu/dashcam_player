@@ -68,6 +68,9 @@
 -(void) displayFrame {
     dispatch_async(self.processingQueue, ^{
         while (true) {
+            if(!self.isStreaming) {
+                break;
+            }
             NSData *data = nil;
             @synchronized (self.frameQueue) {
                 if (self.frameQueue.count > 0) {
@@ -83,7 +86,6 @@
                     [self processFrameData:data];
                 }
             }
-            if(!self.isStreaming)break;
         }
     });
 }
@@ -103,11 +105,16 @@
         if(!strongSelf) return;
         
         if(error) {
-            NSLog(@"Websocket Error: %@", error);
             strongSelf.isStreaming = NO;
             return;
         }
+        
         if (message.type == NSURLSessionWebSocketMessageTypeData) {
+            if(message.data.length < 2) {
+                self.isStreaming = NO;
+                [self.websocketTask cancelWithCloseCode:NSURLSessionWebSocketCloseCodeGoingAway reason:nil];
+                return;
+            }
             [self.frameQueue addObject:message.data];
         } else if (message.type == NSURLSessionWebSocketMessageTypeString) {
             self.metaData = message.string;
@@ -126,7 +133,6 @@
     if(image) {
         dispatch_async(dispatch_get_main_queue(), ^{
             NSArray<NSString *> *datas = [self.metaData componentsSeparatedByString:@": "];
-            NSLog(@"nnnnnn: %@ - %@", datas[0], self.metaData);
             self.metaDataLabel.text = datas[0];
             if (datas.count > 1) {
                 [
@@ -134,6 +140,7 @@
                 ];
             }
             self.imageView.image = image;
+            NSLog(@"fffffffffffffff%@", self.imageView);
         });
     }
 }
