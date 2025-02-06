@@ -23,6 +23,10 @@ SharedMetaData* metaDataInStream;
   [registrar registerViewFactory:g3Factory withId:@"g3_stream"];
   [registrar registerViewFactory:factory withId:@"player"];
   [registrar addMethodCallDelegate:instance channel:channel];
+  [[NSNotificationCenter defaultCenter] addObserver:instance
+                                         selector:@selector(handleVideoEnd:)
+                                             name:AVPlayerItemDidPlayToEndTimeNotification
+                                           object:nil];
 }
 
 
