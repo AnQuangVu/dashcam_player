@@ -71,7 +71,7 @@ SharedMetaData* metaDataInStream;
 }
 
 - (void)handleVideoEnd:(NSNotification *)notification {
-    AVPlayerItem *endedItem = notification.object;
+    AVPlayerItem *endedItem = self.queuePlayer.items.lastObject;
     if (endedItem == self.queuePlayer.currentItem) {
         [self.queuePlayer pause];
     }

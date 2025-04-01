@@ -12,6 +12,7 @@
     if (self) {
         _view = [[UIView alloc] initWithFrame:frame];
         self.queuePlayer = queuePlayer;
+        [self.queuePlayer removeAllItems];
         self.playerLayer = playerLayer;
         self.playerLayer.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.width*9/16);
         self.playerLayer.videoGravity = AVLayerVideoGravityResize;
